@@ -5,7 +5,7 @@ The app map and all wireframe diagrams were designed in Figma. The PNG files in 
 - **Figma source file (app map + wireframes):** https://www.figma.com/design/fjQOCQylZdGEmo6aVZAhd7/Worn-Wireframes
 - **Clickable prototype:** https://www.figma.com/proto/fjQOCQylZdGEmo6aVZAhd7/Worn-Wireframes?node-id=1-24&starting-point-node-id=1-24
 
-To keep an offline copy of the source, download it from Figma with **File → Save local copy** and add the `.fig` file to this directory.
+The Figma source file is saved in this directory as `Worn-Wireframes.fig`.
 
 ## Frame names in the Figma file
 
