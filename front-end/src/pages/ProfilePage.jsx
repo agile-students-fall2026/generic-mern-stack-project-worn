@@ -1,3 +1,15 @@
+import { Button, PageHeader } from '../components'
+import { useAuth } from '../context/authContext'
+
 export default function ProfilePage() {
-  return <h1 className="p-4 text-xl font-semibold">Profile</h1>
+  const { logOut } = useAuth()
+
+  return (
+    <main className="pb-8">
+      <PageHeader title="Profile" />
+      <div className="px-4">
+        <Button variant="secondary" fullWidth onClick={logOut}>Log out</Button>
+      </div>
+    </main>
+  )
 }
