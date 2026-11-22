@@ -20,7 +20,6 @@ let items = [
   { id: "item-11", name: "Navy wool coat", category: "Outerwear", price: 320, purchaseDate: "2024-12-01", imageUrl: "https://picsum.photos/seed/worn-item-11/600/750" },
   { id: "item-12", name: "Denim jacket", category: "Outerwear", price: 98, purchaseDate: "2025-06-12", imageUrl: "https://picsum.photos/seed/worn-item-12/600/750" },
   { id: "item-13", name: "Rain shell", category: "Outerwear", price: 150, purchaseDate: "2026-09-28", imageUrl: "https://picsum.photos/seed/worn-item-13/600/750" },
-  { id: "item-13", name: "Rain shell", category: "Outerwear", price: 150, purchaseDate: "2026-09-28", imageUrl: "https://picsum.photos/seed/worn-item-13/600/750" },
 ]
 
 let nextItemNumber = 14
@@ -81,6 +80,68 @@ app.post("/api/items/new", (req, res) => {
     }
   
     res.json(newItem)
+  })
+
+app.get("/api/items/:itemId/wears", (req, res) => {
+    let itemExists = false
+  
+    for (let i = 0; i < items.length; i++) {
+      if (items[i].id === req.params.itemId) {
+        itemExists = true
+      }
+    }
+  
+    if (!itemExists) {
+      res.json({ error: "item not found" })
+      return
+    }
+  
+    let itemWears = []
+  
+    for (let i = 0; i < wears.length; i++) {
+      if (wears[i].itemId === req.params.itemId) {
+        itemWears.push(wears[i])
+      }
+    }
+  
+    res.json(itemWears)
+  })
+
+  app.post("/api/items/:itemId/bulk-log", (req, res) => {
+    let itemExists = false
+  
+    for (let i = 0; i < items.length; i++) {
+      if (items[i].id === req.params.itemId) {
+        itemExists = true
+      }
+    }
+  
+    if (!itemExists) {
+      res.json({ error: "item not found" })
+      return
+    }
+  
+    let count = 0
+    if (req.body) {
+      count = Number(req.body.count)
+    }
+  
+    if (isNaN(count) || count <= 0 || count % 1 !== 0) {
+      res.json({ error: "estimated wears must be a positive whole number" })
+      return
+    }
+  
+    let newWear = {
+      id: "wear-" + nextWearNumber,
+      itemId: req.params.itemId,
+      type: "estimate",
+      period: "all-time",
+      count: count,
+    }
+    nextWearNumber = nextWearNumber + 1
+    wears.push(newWear)
+  
+    res.json(newWear)
   })
 
 app.post("/api/items/:itemId/edit", (req, res) => {
