@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { Button, Input, PageHeader, Sheet } from '../components'
-import { deleteItem, getCategories, getItem, updateItem } from '../services/closetService'
+import axios from 'axios'
 
 
 
@@ -25,9 +25,12 @@ const EditItemPage = () => {
 
   useEffect(() => {
 
-    getCategories().then(list => setCategories(list))
-
-    getItem(itemId).then(item => {
+    axios.get('/api/categories').then(response => {
+      setCategories(response.data)
+    })
+    
+    axios.get('/api/items/' + itemId).then(response => {
+      const item = response.data
 
       setName(item.name)
       setPrice(item.price)
@@ -52,14 +55,20 @@ const EditItemPage = () => {
 
   const saveItem = async () => {
 
-    await updateItem(itemId, { name, category, price, purchaseDate, imageUrl })
+    await axios.post('/api/items/' + itemId + '/edit', {
+      name: name,
+      category: category,
+      price: price,
+      purchaseDate: purchaseDate,
+      imageUrl: imageUrl
+    })
     navigate(`/closet/${itemId}`)
 
   }
 
   const removeItem = async () => {
 
-    await deleteItem(itemId)
+    await axios.post('/api/items/' + itemId + '/delete')
     navigate('/closet')
 
   }
