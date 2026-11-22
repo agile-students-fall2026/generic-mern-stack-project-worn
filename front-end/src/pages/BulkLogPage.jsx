@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
+import axios from 'axios'
 import { Button, Input, PageHeader } from '../components'
-import { addWearEstimate, getItem, getWears } from '../services/closetService'
 import { costPerWear, formatMoney, withWearStats } from '../utils/itemStats'
 
 export default function BulkLogPage() {
@@ -20,9 +20,14 @@ function BulkLogForm({ itemId }) {
 
   useEffect(() => {
     let cancelled = false
-    Promise.all([getItem(itemId), getWears(itemId)])
-      .then(([details, wears]) => {
-        if (!cancelled) setItem(withWearStats([details], wears)[0])
+    Promise.all([axios.get('/api/items/' + itemId), axios.get('/api/items/' + itemId + '/wears')])
+      .then(([itemResponse, wearsResponse]) => {
+        if (cancelled) return
+          if (itemResponse.data.error) {
+            setError('This item could not be loaded. Return to your closet and try again.')
+          } else {
+            setItem(withWearStats([itemResponse.data], wearsResponse.data)[0])
+          }
       })
       .catch(() => {
         if (!cancelled) setError('This item could not be loaded. Return to your closet and try again.')
@@ -44,7 +49,14 @@ function BulkLogForm({ itemId }) {
     setSaving(true)
     setSaveError('')
     try {
-      await addWearEstimate(itemId, { period: 'all-time', count })
+      const response = await axios.post('/api/items/' + itemId + '/bulk-log', { count: count })
+      // the back-end sends back an error if the count is not ok
+      if (response.data.error) {
+        setSaveError('Could not save your estimate. Please try again.')
+        savingRef.current = false
+        setSaving(false)
+        return
+      }
       navigate(`/closet/${itemId}`, { replace: true })
     } catch {
       setSaveError('Could not save your estimate. Please try again.')
