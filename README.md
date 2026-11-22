@@ -46,7 +46,24 @@ The app will be available at the local URL Vite prints in the terminal (typicall
 
 ### Back-end
 
-**Status:** Not yet implemented. This section will be updated when the back-end is built.
+Express serves the default images and favicon from `back-end/public`.
+
+```bash
+cd back-end
+npm install
+npm start
+```
+
+The server uses port 3000 by default (`PORT` can override it). Available files:
+
+- `/static/images/item-placeholder.svg`
+- `/static/images/default-avatar.svg`
+- `/static/favicon.svg`
+
+Run `npm test` from `back-end` for the Mocha/Chai HTTP tests and c8 coverage.
+Coverage currently targets `app.js`; expand it as backend modules are added.
+Run the frontend in a second terminal. Vite forwards `/static` requests to
+`http://localhost:3000`; update that proxy target if you change the backend port.
 
 ## Additional Documentation
 
