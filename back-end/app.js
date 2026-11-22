@@ -20,7 +20,13 @@ let items = [
   { id: "item-11", name: "Navy wool coat", category: "Outerwear", price: 320, purchaseDate: "2024-12-01", imageUrl: "https://picsum.photos/seed/worn-item-11/600/750" },
   { id: "item-12", name: "Denim jacket", category: "Outerwear", price: 98, purchaseDate: "2025-06-12", imageUrl: "https://picsum.photos/seed/worn-item-12/600/750" },
   { id: "item-13", name: "Rain shell", category: "Outerwear", price: 150, purchaseDate: "2026-09-28", imageUrl: "https://picsum.photos/seed/worn-item-13/600/750" },
+  { id: "item-13", name: "Rain shell", category: "Outerwear", price: 150, purchaseDate: "2026-09-28", imageUrl: "https://picsum.photos/seed/worn-item-13/600/750" },
 ]
+
+let nextItemNumber = 14
+
+let wears = []
+let nextWearNumber = 1
 
 app.get("/api/categories", (req, res) => {
   res.json(categories)
@@ -41,6 +47,41 @@ app.get("/api/items/:itemId", (req, res) => {
     res.json({ error: "item not found" })
   }
 })
+
+app.post("/api/items/new", (req, res) => {
+    if (!req.body.name || !req.body.price || !req.body.category) {
+      res.json({ error: "name, price and category are required" })
+      return
+    }
+  
+    let newId = "item-" + nextItemNumber
+    nextItemNumber = nextItemNumber + 1
+  
+    let newItem = {
+      id: newId,
+      name: req.body.name,
+      category: req.body.category,
+      price: Number(req.body.price),
+      purchaseDate: req.body.purchaseDate || null,
+      imageUrl: req.body.imageUrl || "https://picsum.photos/seed/worn-" + newId + "/600/750",
+    }
+  
+    items.push(newItem)
+  
+    if (req.body.pastWears && Number(req.body.pastWears) > 0) {
+      let newWear = {
+        id: "wear-" + nextWearNumber,
+        itemId: newId,
+        type: "estimate",
+        period: "all-time",
+        count: Number(req.body.pastWears),
+      }
+      nextWearNumber = nextWearNumber + 1
+      wears.push(newWear)
+    }
+  
+    res.json(newItem)
+  })
 
 app.post("/api/items/:itemId/edit", (req, res) => {
   let updatedItem = null
