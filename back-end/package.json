@@ -1,19 +1,20 @@
 {
-  "name": "back-end",
-  "version": "1.0.0",
-  "private": true,
-  "main": "server.js",
-  "scripts": {
-    "start": "node server.js",
-    "test": "c8 --all --include=app.js --include=routes/** --include=middleware/** --include=data/** mocha --timeout=3000"
-  },
-  "dependencies": {
-    "express": "^5.1.0"
-  },
-  "devDependencies": {
-    "c8": "^10.1.3",
-    "chai": "^4.5.0",
-    "mocha": "^11.7.1",
-    "supertest": "^7.1.1"
+    "name": "back-end",
+    "version": "1.0.0",
+    "description": "express server for worn",
+    "main": "server.js",
+    "scripts": {
+      "start": "node server.js",
+      "test": "c8 mocha --timeout=3000"
+    },
+    "dependencies": {
+      "express": "^5.1.0"
+    },
+    "devDependencies": {
+      "c8": "^10.1.3",
+      "chai": "^4.5.0",
+      "chai-http": "^4.4.0",
+      "mocha": "^11.7.1",
+      "nodemon": "^3.1.10"
+    }
   }
-}
