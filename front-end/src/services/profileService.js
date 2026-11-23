@@ -6,6 +6,14 @@ export async function getProfile() {
   return user
 }
 
+export function changePassword({ newPassword, confirmPassword }) {
+  return apiRequest('/api/profile/password', {
+    method: 'POST',
+    headers: authHeaders(),
+    json: { newPassword, confirmPassword },
+  })
+}
+
 export async function deleteAccount() {
   await apiRequest('/api/profile', { method: 'DELETE', headers: authHeaders() })
   clearToken()
