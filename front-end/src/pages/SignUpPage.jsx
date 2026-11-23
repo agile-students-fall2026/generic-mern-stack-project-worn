@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { Button, Input } from '../components'
+import { signUp } from '../services/authService'
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 const MIN_PASSWORD_LENGTH = 8
@@ -35,17 +36,28 @@ export default function SignUpPage() {
   const [showPassword, setShowPassword] = useState(false)
 
   const [errors, setErrors] = useState({})
+  const [serverError, setServerError] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
 
     event.preventDefault()
 
     const validationErrors = validateSignUp({ email, password })
 
     setErrors(validationErrors)
+    setServerError('')
     if (Object.keys(validationErrors).length > 0) return
-    // tehre is no back-end yet ... any valid email and password creates an account for now
-    navigate('/closet')
+
+    setIsSubmitting(true)
+    try {
+      await signUp({ email, password })
+      navigate('/closet')
+    } catch (error) {
+      setServerError(error.message)
+    } finally {
+      setIsSubmitting(false)
+    }
 
   }
 
@@ -105,8 +117,12 @@ export default function SignUpPage() {
           }
         />
 
-        <Button type="submit" size="lg" fullWidth>
-          Create account
+        {serverError && (
+          <p role="alert" className="text-sm text-red-600">{serverError}</p>
+        )}
+
+        <Button type="submit" size="lg" fullWidth disabled={isSubmitting}>
+          {isSubmitting ? 'Creating account…' : 'Create account'}
         </Button>
 
       </form>
