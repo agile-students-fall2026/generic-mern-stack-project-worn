@@ -42,11 +42,13 @@ npm run dev
 
 The app will be available at the local URL Vite prints in the terminal (typically `http://localhost:5173`).
 
-**Testing:** [Add test instructions, e.g. `npm test`, once tests exist.]
+**Testing:** The front-end does not have automated tests yet. Back-end tests are described below.
 
 ### Back-end
 
-Express serves the default images and favicon from `back-end/public`.
+Express.js server. It uses hard-coded mock data for now, until we add a database.
+
+**Requirements:** Node.js 20 or newer.
 
 ```bash
 cd back-end
@@ -54,16 +56,24 @@ npm install
 npm start
 ```
 
-The server uses port 3000 by default (`PORT` can override it). Available files:
+The server runs at `http://localhost:3000`. To try a route, open `http://localhost:3000/api/items/item-1` in your browser.
 
-- `/static/images/item-placeholder.svg`
-- `/static/images/default-avatar.svg`
-- `/static/favicon.svg`
+**Testing:** The back-end uses mocha and chai for unit tests.
 
-Run `npm test` from `back-end` for the Mocha/Chai HTTP tests and c8 coverage.
-Coverage currently targets `app.js`; expand it as backend modules are added.
-Run the frontend in a second terminal. Vite forwards `/static` requests to
-`http://localhost:3000`; update that proxy target if you change the backend port.
+```bash
+cd back-end
+npm test
+```
+
+This runs all the tests in `back-end/test/` and prints a code coverage table at the end.
+
+### Running the whole app
+
+The front-end gets its data from the back-end, so you need both running at the same time, in two separate terminals:
+
+1. In the first terminal, start the back-end: `cd back-end`, then `npm start`
+2. In the second terminal, start the front-end: `cd front-end`, then `npm run dev`
+3. Open the URL Vite prints (typically `http://localhost:5173`)
 
 ## Additional Documentation
 

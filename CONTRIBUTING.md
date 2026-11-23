@@ -46,6 +46,7 @@ These are the commitments team members make to each other.
 - **Self-documenting code.** Use descriptive variable and function names and avoid unnecessary abbreviations.
 - **No dead code.** Delete commented-out or unused code when you see it.
 - **Automated tests.** Write tests for critical integration points and functionality.
+- **Run tests before pushing.** Run `npm test` in `back-end` and make sure all tests pass before opening a pull request.
 
 ## Git Workflow
 
@@ -115,10 +116,35 @@ Open a GitHub issue. For bugs, include steps to reproduce, expected behavior, ac
    npm install
    ```
 
-3. Start the development server:
+3. Install back-end dependencies:
 
    ```bash
+   cd ../back-end
+   npm install
+   ```
+
+4. Start the back-end server (it runs at `http://localhost:3000`):
+
+   ```bash
+   npm start
+   ```
+
+5. In a second terminal, start the front-end development server:
+
+   ```bash
+   cd front-end
    npm run dev
    ```
 
-4. Open the local URL Vite prints in the terminal (typically `http://localhost:5173`).
+6. Open the local URL Vite prints in the terminal (typically `http://localhost:5173`).
+
+### Running Tests
+
+Back-end unit tests use mocha and chai, and c8 for code coverage. Run them from the `back-end` folder:
+
+```bash
+cd back-end
+npm test
+```
+
+Put new test files in `back-end/test/`. Each developer should write tests for the routes they build, including a test with valid input and a test with invalid input.
