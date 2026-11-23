@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { Button, Input, PageHeader, Toggle } from '../components'
-import { addWearEstimate, createItem, getCategories } from '../services/closetService'
+import axios from 'axios'
  
 const AddItemPage = () => {
   const navigate = useNavigate()
@@ -15,7 +15,9 @@ const AddItemPage = () => {
   const [pastWears, setPastWears] = useState('')
  
   useEffect(() => {
-    getCategories().then(list => setCategories(list))
+    axios.get('/api/categories').then(response => {
+      setCategories(response.data)
+    })
   }, [])
  
   const choosePhoto = event => {
@@ -26,16 +28,19 @@ const AddItemPage = () => {
   }
  
   const saveItem = async () => {
-    const item = await createItem({
-      name,
-      category,
-      price,
-      purchaseDate: purchaseDate || null,
-      imageUrl,
+    let wearsToSend = 0
+      if (alreadyOwned) {
+        wearsToSend = pastWears
+      }
+    
+    await axios.post('/api/items/new', {
+      name: name,
+      category: category,
+      price: price,
+      purchaseDate: purchaseDate,
+      imageUrl: imageUrl,
+      pastWears: wearsToSend
     })
-    if (alreadyOwned && pastWears > 0) {
-      await addWearEstimate(item.id, { period: 'all-time', count: pastWears })
-    }
     navigate('/closet')
   }
  

@@ -1,7 +1,15 @@
-import app from './app.js'
+const server = require("./app")
 
-const PORT = process.env.PORT || 3000
+const port = 3000
 
-app.listen(PORT, () => {
-  console.log(`Back-end listening on http://localhost:${PORT}`)
+const listener = server.listen(port, function () {
+  console.log(`Server running on port: ${port}`)
 })
+
+const close = () => {
+  listener.close()
+}
+
+module.exports = {
+  close: close,
+}
