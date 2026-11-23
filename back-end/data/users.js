@@ -71,6 +71,13 @@ function endSession(token) {
   sessions.delete(token)
 }
 
+function deleteUser(userId) {
+  users = users.filter((user) => user.id !== userId)
+  for (const [token, sessionUserId] of sessions) {
+    if (sessionUserId === userId) sessions.delete(token)
+  }
+}
+
 function resetUsers() {
   users = []
   sessions = new Map()
@@ -92,5 +99,6 @@ module.exports = {
   createSession,
   userForToken,
   endSession,
+  deleteUser,
   resetUsers,
 }

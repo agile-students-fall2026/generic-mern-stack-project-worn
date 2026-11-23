@@ -38,6 +38,14 @@ export async function signUp({ email, password }) {
   return user
 }
 
+export async function logOut() {
+  try {
+    await apiRequest('/api/auth/logout', { method: 'POST', headers: authHeaders() })
+  } finally {
+    clearToken()
+  }
+}
+
 export async function logIn({ email, password }) {
   const { user, token } = await apiRequest('/api/auth/login', {
     method: 'POST',

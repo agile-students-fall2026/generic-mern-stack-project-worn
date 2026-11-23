@@ -1,5 +1,6 @@
 const express = require('express')
 const users = require('../data/users')
+const requireAuth = require('../middleware/requireAuth')
 
 const router = express.Router()
 
@@ -37,6 +38,11 @@ router.post('/login', (req, res) => {
 
   const token = users.createSession(user.id)
   res.json({ user: users.publicUser(user), token })
+})
+
+router.post('/logout', requireAuth, (req, res) => {
+  users.endSession(req.token)
+  res.status(204).end()
 })
 
 module.exports = router
