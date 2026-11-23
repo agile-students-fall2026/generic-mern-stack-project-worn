@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Button, Input } from '../components'
+import { changePassword } from '../services/profileService'
 
 const MIN_PASSWORD_LENGTH = 8
 
@@ -12,6 +13,8 @@ export default function ResetPasswordPage() {
   const [showNew, setShowNew] = useState(false)
   const [showConfirm, setShowConfirm] = useState(false)
   const [errors, setErrors] = useState({})
+  const [serverError, setServerError] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   // checks both passwords and return errors
   function checkPasswords() {
@@ -32,14 +35,22 @@ export default function ResetPasswordPage() {
     return found
   }
 
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
     event.preventDefault()
 
     const found = checkPasswords()
     setErrors(found)
+    setServerError('')
     if (Object.keys(found).length > 0) return
 
-    navigate('/profile')
+    setIsSubmitting(true)
+    try {
+      await changePassword({ newPassword, confirmPassword })
+      navigate('/profile')
+    } catch (error) {
+      setServerError(error.message)
+      setIsSubmitting(false)
+    }
   }
 
   return (
@@ -101,8 +112,12 @@ export default function ResetPasswordPage() {
           }
         />
 
-        <Button type="submit" size="lg" fullWidth>
-          Reset password
+        {serverError && (
+          <p role="alert" className="text-sm text-red-600">{serverError}</p>
+        )}
+
+        <Button type="submit" size="lg" fullWidth disabled={isSubmitting}>
+          {isSubmitting ? 'Saving…' : 'Reset password'}
         </Button>
       </form>
     </div>

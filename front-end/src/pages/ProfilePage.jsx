@@ -1,18 +1,40 @@
-import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useEffect, useState } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
 import { Button, PageHeader, Sheet } from '../components'
+import { getToken, logOut } from '../services/authService'
+import { deleteAccount, getProfile } from '../services/profileService'
 
 export default function ProfilePage() {
   const navigate = useNavigate()
 
-  // placeholder user for now
-  const name = 'Your name'
-  const email = 'you@example.com'
+  const [user, setUser] = useState(null)
+  const [loadError, setLoadError] = useState('')
+  const [deleteError, setDeleteError] = useState('')
+  const [isWorking, setIsWorking] = useState(false)
 
   const [photo, setPhoto] = useState(null)
 
   const [showLogout, setShowLogout] = useState(false)
   const [showDelete, setShowDelete] = useState(false)
+
+  useEffect(() => {
+    if (!getToken()) {
+      navigate('/login', { replace: true })
+      return
+    }
+
+    let ignore = false
+    getProfile()
+      .then((profile) => {
+        if (!ignore) setUser(profile)
+      })
+      .catch((error) => {
+        if (!ignore) setLoadError(error.message)
+      })
+    return () => {
+      ignore = true
+    }
+  }, [navigate])
 
   function handlePhotoChange(event) {
     const file = event.target.files[0]
@@ -21,8 +43,48 @@ export default function ProfilePage() {
     }
   }
 
-  function goToWelcome() {
+  async function handleLogOut() {
+    setIsWorking(true)
+    try {
+      await logOut()
+    } catch {
+    }
     navigate('/welcome')
+  }
+
+  async function handleDelete() {
+    setDeleteError('')
+    setIsWorking(true)
+    try {
+      await deleteAccount()
+      navigate('/welcome')
+    } catch (error) {
+      setDeleteError(error.message)
+      setIsWorking(false)
+    }
+  }
+
+  if (loadError) {
+    return (
+      <div className="pb-8">
+        <PageHeader title="Profile" />
+        <div className="px-4">
+          <p role="alert" className="text-sm text-red-600">{loadError}</p>
+          <Link to="/login" className="mt-4 inline-block font-medium text-stone-900 underline">
+            Log in
+          </Link>
+        </div>
+      </div>
+    )
+  }
+
+  if (!user) {
+    return (
+      <div className="pb-8">
+        <PageHeader title="Profile" />
+        <p className="px-4 text-sm text-stone-500">Loading…</p>
+      </div>
+    )
   }
 
   return (
@@ -37,8 +99,8 @@ export default function ProfilePage() {
         )}
 
         <div>
-          <p className="font-semibold">{name}</p>
-          <p className="text-sm text-stone-500">{email}</p>
+          <p className="font-semibold">{user.name}</p>
+          <p className="text-sm text-stone-500">{user.email}</p>
 
           <label className="mt-2 block cursor-pointer text-sm font-medium">
             Edit profile picture
@@ -73,7 +135,7 @@ export default function ProfilePage() {
 
       <Sheet open={showLogout} onClose={() => setShowLogout(false)} title="Log out?">
         <div className="flex flex-col gap-3">
-          <Button fullWidth onClick={goToWelcome}>
+          <Button fullWidth onClick={handleLogOut} disabled={isWorking}>
             Log out
           </Button>
           <Button variant="secondary" fullWidth onClick={() => setShowLogout(false)}>
@@ -84,8 +146,11 @@ export default function ProfilePage() {
 
       <Sheet open={showDelete} onClose={() => setShowDelete(false)} title="Delete your account?">
         <p className="mb-4 text-sm text-stone-600">This can't be undone.</p>
+        {deleteError && (
+          <p role="alert" className="mb-4 text-sm text-red-600">{deleteError}</p>
+        )}
         <div className="flex flex-col gap-3">
-          <Button variant="danger" fullWidth onClick={goToWelcome}>
+          <Button variant="danger" fullWidth onClick={handleDelete} disabled={isWorking}>
             Delete account
           </Button>
           <Button variant="secondary" fullWidth onClick={() => setShowDelete(false)}>

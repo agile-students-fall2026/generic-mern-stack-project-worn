@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { Button, Input } from '../components'
+import { logIn } from '../services/authService'
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
@@ -34,19 +35,29 @@ export default function LogInPage() {
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [errors, setErrors] = useState({})
+  const [serverError, setServerError] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
 
 
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
 
     event.preventDefault()
     const validationErrors = validateLogIn({ email, password })
     setErrors(validationErrors)
+    setServerError('')
 
     if (Object.keys(validationErrors).length > 0) return
 
-    // theres no back end for now btw
-    navigate('/closet')
+    setIsSubmitting(true)
+    try {
+      await logIn({ email, password })
+      navigate('/closet')
+    } catch (error) {
+      setServerError(error.message)
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (
@@ -96,8 +107,11 @@ export default function LogInPage() {
         <Link to="/forgot-password" className="text-sm font-medium text-stone-900">
           Forgot password?
         </Link>
-        <Button type="submit" size="lg" fullWidth>
-          Log in
+        {serverError && (
+          <p role="alert" className="text-sm text-red-600">{serverError}</p>
+        )}
+        <Button type="submit" size="lg" fullWidth disabled={isSubmitting}>
+          {isSubmitting ? 'Logging in…' : 'Log in'}
         </Button>
 
       </form>
