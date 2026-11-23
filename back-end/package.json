@@ -5,7 +5,7 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "test": "c8 --all --include=app.js mocha --timeout=3000"
+    "test": "c8 --all --include=app.js --include=routes/** --include=middleware/** --include=data/** mocha --timeout=3000"
   },
   "dependencies": {
     "express": "^5.1.0"
