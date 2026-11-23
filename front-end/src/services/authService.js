@@ -37,3 +37,12 @@ export async function signUp({ email, password }) {
   saveToken(token)
   return user
 }
+
+export async function logIn({ email, password }) {
+  const { user, token } = await apiRequest('/api/auth/login', {
+    method: 'POST',
+    json: { email: email.trim(), password },
+  })
+  saveToken(token)
+  return user
+}
