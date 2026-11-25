@@ -79,6 +79,12 @@ function updatePassword(userId, newPassword, keepToken) {
   }
 }
 
+function updateEmail(userId, newEmail) {
+  const user = findUserById(userId)
+  user.email = normalizeEmail(newEmail)
+  return user
+}
+
 function deleteUser(userId) {
   users = users.filter((user) => user.id !== userId)
   for (const [token, sessionUserId] of sessions) {
@@ -109,5 +115,6 @@ module.exports = {
   endSession,
   deleteUser,
   updatePassword,
+  updateEmail,
   resetUsers,
 }
