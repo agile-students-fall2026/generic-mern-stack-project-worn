@@ -14,6 +14,14 @@ export function changePassword({ newPassword, confirmPassword }) {
   })
 }
 
+export function changeEmail({ newEmail, confirmEmail }) {
+  return apiRequest('/api/profile/email', {
+    method: 'POST',
+    headers: authHeaders(),
+    json: { newEmail, confirmEmail },
+  })
+}
+
 export async function deleteAccount() {
   await apiRequest('/api/profile', { method: 'DELETE', headers: authHeaders() })
   clearToken()
