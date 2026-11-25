@@ -31,8 +31,6 @@ function today() {
   return new Date().toISOString().slice(0, 10)
 }
 
-// Items
-
 export function getCategories() {
   return respond(CATEGORIES)
 }
@@ -77,8 +75,6 @@ export function deleteItem(itemId) {
   return respond({ id: itemId })
 }
 
-// Wears
-
 // All wears, or only one item's wears when itemId is given. Newest first.
 export function getWears(itemId) {
   const result = itemId ? wears.filter((w) => w.itemId === itemId) : wears
@@ -108,7 +104,6 @@ export function addWearEstimate(itemId, { period, count }) {
   return respond(estimate)
 }
 
-// Removes a single wear record (used by undo).
 export function deleteWear(wearId) {
   return apiRequest(`/api/wears/${encodeURIComponent(wearId)}`, { method: 'DELETE' })
 }
