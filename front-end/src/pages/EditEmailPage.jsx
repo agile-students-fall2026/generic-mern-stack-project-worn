@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Button, Input, PageHeader } from '../components'
+import { changeEmail } from '../services/profileService'
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
@@ -10,6 +11,8 @@ export default function EditEmailPage() {
   const [newEmail, setNewEmail] = useState('')
   const [confirmEmail, setConfirmEmail] = useState('')
   const [errors, setErrors] = useState({})
+  const [serverError, setServerError] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   function findErrors() {
     const found = {}
@@ -31,14 +34,22 @@ export default function EditEmailPage() {
     return found
   }
 
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
     event.preventDefault()
 
     const found = findErrors()
     setErrors(found)
+    setServerError('')
     if (Object.keys(found).length > 0) return
 
-    navigate('/profile')
+    setIsSubmitting(true)
+    try {
+      await changeEmail({ newEmail: newEmail.trim(), confirmEmail: confirmEmail.trim() })
+      navigate('/profile')
+    } catch (error) {
+      setServerError(error.message)
+      setIsSubmitting(false)
+    }
   }
 
   return (
@@ -66,8 +77,12 @@ export default function EditEmailPage() {
           error={errors.confirmEmail}
         />
 
-        <Button type="submit" fullWidth>
-          Update email
+        {serverError && (
+          <p role="alert" className="text-sm text-red-600">{serverError}</p>
+        )}
+
+        <Button type="submit" fullWidth disabled={isSubmitting}>
+          {isSubmitting ? 'Saving…' : 'Update email'}
         </Button>
       </form>
     </div>

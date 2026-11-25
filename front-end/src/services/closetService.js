@@ -80,20 +80,21 @@ export async function getWears(itemId) {
   let path = '/api/wears'
   if (itemId) {
     path = `/api/wears?itemId=${encodeURIComponent(itemId)}`
-  }
+  }\
   const result = await apiGet(path)
   return result.sort((a, b) => b.date.localeCompare(a.date))
+export function getWears(itemId) {
+  const result = itemId ? wears.filter((w) => w.itemId === itemId) : wears
+  return respond([...result].sort((a, b) => b.date.localeCompare(a.date)))
 }
 
 export function logWear(itemId, date = today()) {
-  if (!items.some((i) => i.id === itemId)) return fail(`Item ${itemId} not found`)
-
-  const wear = { id: newId('wear'), itemId, type: 'logged', date }
-  wears = [...wears, wear]
-  return respond(wear)
+  return apiRequest(`/api/items/${encodeURIComponent(itemId)}/wears`, {
+    method: 'POST',
+    json: { date },
+  })
 }
 
-// period is 'this-year', 'last-year', or 'all-time'
 export function addWearEstimate(itemId, { period, count }) {
   if (!items.some((i) => i.id === itemId)) return fail(`Item ${itemId} not found`)
   const amount = Number(count)
