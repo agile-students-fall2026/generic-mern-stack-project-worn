@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { Button, PageHeader } from '../components'
 import { deleteWear, getItem, getWears, logWear } from '../services/closetService'
@@ -16,6 +16,8 @@ function ItemDetails({ itemId }) {
 
   const [wearToDelete, setWearToDelete] = useState(null)
   const [actionError, setActionError] = useState('')
+  const [pending, setPending] = useState(false)
+  const pendingRef = useRef(false)
 
   useEffect(() => {
     let cancelled = false
@@ -34,40 +36,53 @@ function ItemDetails({ itemId }) {
   async function reloadWears() {
     const history = await getWears(itemId)
     setWears(history)
-    setItem(withWearStats([item], history)[0])
+    setItem(current => withWearStats([current], history)[0])
   }
 
+
+  async function runAction(action, failureMessage, successMessage) {
+    if (pendingRef.current) return
+    pendingRef.current = true
+    setPending(true)
+    setActionError('')
+    try {
+      await action()
+      if (successMessage) {
+        try {
+          await reloadWears()
+        } catch {
+          setActionError(`${successMessage}, but history could not refresh. Use Retry refresh.`)
+        }
+      }
+    } catch {
+      setActionError(failureMessage)
+    } finally {
+      pendingRef.current = false
+      setPending(false)
+    }
+  }
+
+  async function retryRefresh() {
+    await runAction(reloadWears, 'Could not refresh history. Please try again.')
+  }
 
   async function wearToday() {
-    setActionError('')
-
     const now = new Date()
-    const date = [
-      now.getFullYear(),
-      String(now.getMonth() + 1).padStart(2, '0'),
-      String(now.getDate()).padStart(2, '0'),
-    ].join('-')
-
-    try {
-      await logWear(itemId, date)
-      await reloadWears()
-    } catch {
-      setActionError('Could not log a wear. Please try again.')
-    }
+    const date = [now.getFullYear(), String(now.getMonth() + 1).padStart(2, '0'),
+      String(now.getDate()).padStart(2, '0')].join('-')
+    await runAction(() => logWear(itemId, date),
+      'Could not log a wear. Please try again.', 'Wear saved')
   }
 
-
   async function removeWear() {
-    setActionError('')
-
-    try {
-      await deleteWear(wearToDelete.id)
-      setWearToDelete(null)
-      await reloadWears()
-    } catch {
-      setWearToDelete(null)
-      setActionError('Could not remove that wear. Please try again.')
-    }
+    if (!wearToDelete) return
+    await runAction(async () => {
+      try {
+        await deleteWear(wearToDelete.id)
+      } finally {
+        setWearToDelete(null)
+      }
+    }, 'Could not remove that wear. Please try again.', 'Wear removed')
   }
 
   return (
@@ -101,13 +116,18 @@ function ItemDetails({ itemId }) {
           </dl>
 
           <div className="space-y-2">
-            <Button fullWidth onClick={wearToday}>
+            <Button fullWidth disabled={pending} onClick={wearToday}>
               Wear it today
             </Button>
             <Link to={`/closet/${itemId}/bulk-log`} className="flex min-h-11 items-center justify-center rounded-xl bg-stone-100 px-4 text-sm font-semibold text-stone-900 ring-1 ring-stone-300">
               Bulk-log past wears
             </Link>
-            {actionError && <p role="alert" className="text-sm text-red-600">{actionError}</p>}
+            {actionError && (
+              <div>
+                <p role="alert" className="text-sm text-red-600">{actionError}</p>
+                <Button variant="secondary" disabled={pending} onClick={retryRefresh}>Retry refresh</Button>
+              </div>
+            )}
           </div>
 
           <section aria-labelledby="wear-history">
@@ -124,6 +144,7 @@ function ItemDetails({ itemId }) {
                       <button
                         type="button"
                         aria-label={`Remove wear from ${wear.date}`}
+                        disabled={pending}
                         onClick={() => setWearToDelete(wear)}
                         className="px-1 text-stone-500 hover:text-stone-900"
                       >
@@ -148,10 +169,10 @@ function ItemDetails({ itemId }) {
                 : `This will remove the wear logged on ${wearToDelete.date}.`}
             </p>
             <div className="mt-4 flex gap-2">
-              <Button variant="secondary" fullWidth onClick={() => setWearToDelete(null)}>
+              <Button variant="secondary" fullWidth disabled={pending} onClick={() => setWearToDelete(null)}>
                 Cancel
               </Button>
-              <Button variant="danger" fullWidth onClick={removeWear}>
+              <Button variant="danger" fullWidth disabled={pending} onClick={removeWear}>
                 Remove
               </Button>
             </div>

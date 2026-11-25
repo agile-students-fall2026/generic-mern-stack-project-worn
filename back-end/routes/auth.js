@@ -45,4 +45,19 @@ router.post('/logout', requireAuth, (req, res) => {
   res.status(204).end()
 })
 
+router.post('/forgot-password', (req, res) => {
+  const { email } = req.body ?? {}
+
+  if (!users.isValidEmail(email)) {
+    return res.status(400).json({ message: 'Enter a valid email address.' })
+  }
+
+  const user = users.findUserByEmail(email)
+  if (user) {
+    console.log('Reset email sent to ' + user.email)
+  }
+
+  res.json({ message: 'If an account exists for that email, a reset link has been sent.' })
+})
+
 module.exports = router

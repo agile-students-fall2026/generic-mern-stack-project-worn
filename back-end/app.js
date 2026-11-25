@@ -1,11 +1,16 @@
 const express = require("express")
-const path = require('node:path')
+const path = require("node:path")
+const authRoutes = require("./routes/auth")
+const profileRoutes = require("./routes/profile")
+const { apiNotFound, errorHandler } = require("./middleware/errors")
 const app = express()
-
-app.use('/static', express.static(path.join(__dirname, 'public')))
 
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
+
+app.use("/static", express.static(path.join(__dirname, "public")))
+app.use("/api/auth", authRoutes)
+app.use("/api/profile", profileRoutes)
 
 let categories = ["Tops", "Bottoms", "Shoes", "Outerwear"]
 
@@ -46,8 +51,18 @@ app.get("/api/items/:itemId", (req, res) => {
   if (foundItem) {
     res.json(foundItem)
   } else {
-    res.json({ error: "item not found" })
+    res.status(404).json({ message: "item not found" })
   }
+})
+
+app.delete("/api/wears/:id", (req, res) => {
+  const index = wears.findIndex(wear => wear.id === req.params.id)
+  if (index === -1) {
+    return res.status(404).json({ message: "wear not found" })
+  }
+
+  const [removed] = wears.splice(index, 1)
+  res.json({ id: removed.id })
 })
 
 app.post("/api/items/new", (req, res) => {
@@ -188,5 +203,8 @@ app.post("/api/items/:itemId/delete", (req, res) => {
     res.json({ error: "item not found" })
   }
 })
+
+app.use("/api", apiNotFound)
+app.use(errorHandler)
 
 module.exports = app
