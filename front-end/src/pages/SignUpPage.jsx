@@ -127,13 +127,6 @@ export default function SignUpPage() {
 
       </form>
 
-      <p className="mt-4 text-sm text-stone-500">
-
-        By creating an account, you agree to our{' '}
-        <span className="font-semibold text-stone-900">Terms</span> and{' '}
-        <span className="font-semibold text-stone-900">Privacy Policy</span>.
-      </p>
-
       <p className="mt-4 text-stone-700">
         
         Already have an account?{' '}

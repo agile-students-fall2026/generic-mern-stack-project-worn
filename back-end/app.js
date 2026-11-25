@@ -1,8 +1,16 @@
 const express = require("express")
+const path = require("node:path")
+const authRoutes = require("./routes/auth")
+const profileRoutes = require("./routes/profile")
+const { apiNotFound, errorHandler } = require("./middleware/errors")
 const app = express()
 
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
+
+app.use("/static", express.static(path.join(__dirname, "public")))
+app.use("/api/auth", authRoutes)
+app.use("/api/profile", profileRoutes)
 
 let categories = ["Tops", "Bottoms", "Shoes", "Outerwear"]
 
@@ -185,5 +193,8 @@ app.post("/api/items/:itemId/delete", (req, res) => {
     res.json({ error: "item not found" })
   }
 })
+
+app.use("/api", apiNotFound)
+app.use(errorHandler)
 
 module.exports = app

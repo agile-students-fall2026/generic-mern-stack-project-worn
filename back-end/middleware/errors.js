@@ -1,11 +1,8 @@
-// JSON 404 for unknown /api routes. Mount after all API routes.
-export function apiNotFound(req, res) {
+function apiNotFound(req, res) {
   res.status(404).json({ message: `No API route for ${req.method} ${req.originalUrl}` })
 }
 
-// Sends errors as { message } JSON, the shape the front-end API helper reads.
-// Server errors get a generic message so internal details are not exposed.
-export function errorHandler(err, req, res, next) {
+function errorHandler(err, req, res, next) {
   if (res.headersSent) return next(err)
 
   const status = err.status || err.statusCode || 500
@@ -15,3 +12,5 @@ export function errorHandler(err, req, res, next) {
   }
   res.status(status).json({ message: err.message })
 }
+
+module.exports = { apiNotFound, errorHandler }
