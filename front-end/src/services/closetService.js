@@ -1,5 +1,5 @@
-// Item detail reads and wear deletion use Express. Other operations remain on mock data until the related route tasks are integrated.
-
+// Item detail reads and wear deletion use Express. Other operations remain
+// on mock data until the related route tasks are integrated.
 import { apiGet, apiRequest } from './api.js'
 import { mockItems, picsumUrl, CATEGORIES } from '../data/mockItems.js'
 import { mockWears } from '../data/mockWears.js'
@@ -75,18 +75,21 @@ export function deleteItem(itemId) {
   return respond({ id: itemId })
 }
 
+// All wears, or only one item's wears when itemId is given. Newest first.
 export function getWears(itemId) {
   const result = itemId ? wears.filter((w) => w.itemId === itemId) : wears
   return respond([...result].sort((a, b) => b.date.localeCompare(a.date)))
 }
 
 export function logWear(itemId, date = today()) {
-  return apiRequest(`/api/items/${encodeURIComponent(itemId)}/wears`, {
-    method: 'POST',
-    json: { date },
-  })
+  if (!items.some((i) => i.id === itemId)) return fail(`Item ${itemId} not found`)
+
+  const wear = { id: newId('wear'), itemId, type: 'logged', date }
+  wears = [...wears, wear]
+  return respond(wear)
 }
 
+// period is 'this-year', 'last-year', or 'all-time'
 export function addWearEstimate(itemId, { period, count }) {
   if (!items.some((i) => i.id === itemId)) return fail(`Item ${itemId} not found`)
   const amount = Number(count)

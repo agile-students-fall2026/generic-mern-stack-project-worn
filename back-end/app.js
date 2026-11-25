@@ -65,48 +65,6 @@ app.delete("/api/wears/:id", (req, res) => {
   res.json({ id: removed.id })
 })
 
-app.post("/api/items/:itemId/wears", (req, res) => {
-  let itemExists = false
-
-  for (let i = 0; i < items.length; i++) {
-    if (items[i].id === req.params.itemId) {
-      itemExists = true
-    }
-  }
-
-  if (!itemExists) {
-    return res.status(404).json({ message: "item not found" })
-  }
-
-  let date = new Date().toISOString().slice(0, 10)
-  if (req.body && req.body.date) {
-    date = req.body.date
-  }
-
-  let dateIsValid = typeof date === "string" && /^\d{4}-\d{2}-\d{2}$/.test(date)
-  if (dateIsValid) {
-    const parsed = new Date(date)
-    if (isNaN(parsed.getTime()) || parsed.toISOString().slice(0, 10) !== date) {
-      dateIsValid = false
-    }
-  }
-
-  if (!dateIsValid) {
-    return res.status(400).json({ message: "date must be a real date in YYYY-MM-DD format" })
-  }
-
-  let newWear = {
-    id: "wear-" + nextWearNumber,
-    itemId: req.params.itemId,
-    type: "logged",
-    date: date,
-  }
-  nextWearNumber = nextWearNumber + 1
-  wears.push(newWear)
-
-  res.status(201).json(newWear)
-})
-
 app.post("/api/items/new", (req, res) => {
     if (!req.body.name || !req.body.price || !req.body.category) {
       res.json({ error: "name, price and category are required" })
