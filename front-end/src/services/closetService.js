@@ -1,8 +1,8 @@
-// Service functions for closet items and wears. They work on in-memory mock
-// data for now and return promises, so the screens will not need to change
-// when these switch to calling the back-end API.
-import { mockItems, picsumUrl, CATEGORIES } from '../data/mockItems'
-import { mockWears } from '../data/mockWears'
+// Item detail reads and wear deletion use Express. Other operations remain
+// on mock data until the related route tasks are integrated.
+import { apiGet, apiRequest } from './api.js'
+import { mockItems, picsumUrl, CATEGORIES } from '../data/mockItems.js'
+import { mockWears } from '../data/mockWears.js'
 
 let items = mockItems.map((item) => ({ ...item }))
 let wears = mockWears.map((wear) => ({ ...wear }))
@@ -42,8 +42,7 @@ export function getItems() {
 }
 
 export function getItem(itemId) {
-  const item = items.find((i) => i.id === itemId)
-  return item ? respond(item) : fail(`Item ${itemId} not found`)
+  return apiGet(`/api/items/${encodeURIComponent(itemId)}`)
 }
 
 export function createItem({ name, category, price, purchaseDate = null, imageUrl = null }) {
@@ -111,8 +110,5 @@ export function addWearEstimate(itemId, { period, count }) {
 
 // Removes a single wear record (used by undo).
 export function deleteWear(wearId) {
-  if (!wears.some((w) => w.id === wearId)) return fail(`Wear ${wearId} not found`)
-
-  wears = wears.filter((w) => w.id !== wearId)
-  return respond({ id: wearId })
+  return apiRequest(`/api/wears/${encodeURIComponent(wearId)}`, { method: 'DELETE' })
 }

@@ -43,8 +43,18 @@ app.get("/api/items/:itemId", (req, res) => {
   if (foundItem) {
     res.json(foundItem)
   } else {
-    res.json({ error: "item not found" })
+    res.status(404).json({ message: "item not found" })
   }
+})
+
+app.delete("/api/wears/:id", (req, res) => {
+  const index = wears.findIndex(wear => wear.id === req.params.id)
+  if (index === -1) {
+    return res.status(404).json({ message: "wear not found" })
+  }
+
+  const [removed] = wears.splice(index, 1)
+  res.json({ id: removed.id })
 })
 
 app.post("/api/items/new", (req, res) => {

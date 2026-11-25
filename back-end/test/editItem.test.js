@@ -38,9 +38,9 @@ describe("GET request to /api/items/:itemId route", () => {
       .request(server)
       .get("/api/items/not-a-real-item")
       .end((err, res) => {
-        res.should.have.status(200)
+        res.should.have.status(404)
         res.body.should.be.a("object")
-        res.body.should.have.property("error", "item not found")
+        res.body.should.have.property("message", "item not found")
         done()
       })
   })
@@ -99,8 +99,8 @@ describe("POST request to /api/items/:itemId/delete route", () => {
       .request(server)
       .get("/api/items/item-13")
       .end((err, res) => {
-        res.should.have.status(200)
-        res.body.should.have.property("error", "item not found")
+        res.should.have.status(404)
+        res.body.should.have.property("message", "item not found")
         done()
       })
   })
