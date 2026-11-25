@@ -39,6 +39,22 @@ app.get("/api/categories", (req, res) => {
   res.json(categories)
 })
 
+app.get("/api/items", (req, res) => {
+  res.json(items)
+})
+
+app.get("/api/wears", (req, res) => {
+  let result = []
+
+  for (let i = 0; i < wears.length; i++) {
+    if (!req.query.itemId || wears[i].itemId === req.query.itemId) {
+      result.push(wears[i])
+    }
+  }
+
+  res.json(result)
+})
+
 app.get("/api/items/:itemId", (req, res) => {
   let foundItem = null
 
@@ -92,6 +108,7 @@ app.post("/api/items/new", (req, res) => {
         type: "estimate",
         period: "all-time",
         count: Number(req.body.pastWears),
+        date: new Date().toISOString().slice(0, 10),
       }
       nextWearNumber = nextWearNumber + 1
       wears.push(newWear)
@@ -155,6 +172,7 @@ app.get("/api/items/:itemId/wears", (req, res) => {
       type: "estimate",
       period: "all-time",
       count: count,
+      date: new Date().toISOString().slice(0, 10),
     }
     nextWearNumber = nextWearNumber + 1
     wears.push(newWear)

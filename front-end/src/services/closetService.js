@@ -1,7 +1,7 @@
-// Item detail reads and wear deletion use Express. Other operations remain
-// on mock data until the related route tasks are integrated.
+// Item detail reads and wear deletion use Express. Other operations remain on mock data until the related route tasks are integrated.
+
 import { apiGet, apiRequest } from './api.js'
-import { mockItems, picsumUrl, CATEGORIES } from '../data/mockItems.js'
+import { mockItems, picsumUrl } from '../data/mockItems.js'
 import { mockWears } from '../data/mockWears.js'
 
 let items = mockItems.map((item) => ({ ...item }))
@@ -32,11 +32,11 @@ function today() {
 }
 
 export function getCategories() {
-  return respond(CATEGORIES)
+  return apiGet('/api/categories')
 }
 
 export function getItems() {
-  return respond(items)
+  return apiGet('/api/items')
 }
 
 export function getItem(itemId) {
@@ -76,9 +76,13 @@ export function deleteItem(itemId) {
 }
 
 // All wears, or only one item's wears when itemId is given. Newest first.
-export function getWears(itemId) {
-  const result = itemId ? wears.filter((w) => w.itemId === itemId) : wears
-  return respond([...result].sort((a, b) => b.date.localeCompare(a.date)))
+export async function getWears(itemId) {
+  let path = '/api/wears'
+  if (itemId) {
+    path = `/api/wears?itemId=${encodeURIComponent(itemId)}`
+  }
+  const result = await apiGet(path)
+  return result.sort((a, b) => b.date.localeCompare(a.date))
 }
 
 export function logWear(itemId, date = today()) {
