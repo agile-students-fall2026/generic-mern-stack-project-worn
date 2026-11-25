@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { Button, Input } from '../components'
-
+import { forgotPassword } from '../services/authService'
 
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
@@ -20,9 +20,9 @@ export default function ForgotPasswordPage() {
 
   const navigate = useNavigate()
   const [email, setEmail] = useState('')
-
+  const [serverError, setServerError] = useState('')
   const [emailError, setEmailError] = useState('')
-
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const [isLinkSent, setIsLinkSent] = useState(false)
 
   const [isLinkResent, setIsLinkResent] = useState(false)
@@ -33,8 +33,8 @@ export default function ForgotPasswordPage() {
     const error = validateEmail(email)
     setEmailError(error)
     if (error) return
-    // since there is no back end yet, we oretend there is reset link
-    setIsLinkSent(true)
+    // ask the back-end to send the reset link
+    sendLink(false)
 
   }
 
@@ -56,6 +56,24 @@ export default function ForgotPasswordPage() {
       navigate('/login')
     }
 
+  }
+
+  async function sendLink(isResend) {
+    setServerError('')
+    setIsSubmitting(true)
+
+    try {
+      await forgotPassword(email)
+      if (isResend) {
+        setIsLinkResent(true)
+      } else {
+        setIsLinkSent(true)
+      }
+    } catch (err) {
+      setServerError(err.message)
+    }
+
+    setIsSubmitting(false)
   }
 
   return (
@@ -85,14 +103,14 @@ export default function ForgotPasswordPage() {
             Didn&apos;t get the email? Check your spam folder or request another link.
           </p>
 
-          <Button size="lg" fullWidth onClick={() => setIsLinkResent(true)}>
+          <Button size="lg" fullWidth disabled={isSubmitting} onClick={() => sendLink(true)}>
             Resend link
           </Button>
 
           {isLinkResent && (
             <p className="text-sm text-stone-500">We sent another link.</p>
           )}
-
+          {serverError && <p role="alert" className="text-sm text-red-600">{serverError}</p>}
           <button
             type="button"
             onClick={returnToEmailForm}
@@ -124,11 +142,11 @@ export default function ForgotPasswordPage() {
             error={emailError}
 
           />
-          <Button type="submit" size="lg" fullWidth>
-            Send reset link
+          <Button type="submit" size="lg" fullWidth disabled={isSubmitting}>
+            {isSubmitting ? 'Sending…' : 'Send reset link'}
 
           </Button>
-
+          {serverError && <p role="alert" className="text-sm text-red-600">{serverError}</p>}
           <Link to="/login" className="self-start text-stone-900">
             Back to log in
 

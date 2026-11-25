@@ -54,3 +54,10 @@ export async function logIn({ email, password }) {
   saveToken(token)
   return user
 }
+
+export async function forgotPassword(email) {
+  await apiRequest('/api/auth/forgot-password', {
+    method: 'POST',
+    json: { email: email.trim() },
+  })
+}
